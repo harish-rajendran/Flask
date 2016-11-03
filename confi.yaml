@@ -1,0 +1,6 @@
+db_config:
+  cursorclass: MySQLdb.cursors.DictCursor
+  db: sample
+  host: localhost
+  passwd: user
+  user: user
