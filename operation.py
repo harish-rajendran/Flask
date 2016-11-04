@@ -17,8 +17,6 @@ from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER, TA_RIGHT
 
 dbaccess = DBsingleTon()
 
-db = dbaccess.db_conn()
-
 def validate(values):
     vid = values['vendorid'] 
     sname = values['storename']
@@ -35,7 +33,8 @@ def validate(values):
 def check(values):
     vid = values['vendorid']
     sid = values['storeid']
-    cursor = db.cursor()
+    db = dbaccess.db_conn()
+    cursor = db.cursor(buffered=True)
     cursor.execute("SELECT * FROM vendor WHERE vendorid =%s AND storeid = %s" ,(vid,sid))
     db.commit()
     count = cursor.rowcount       
@@ -53,7 +52,8 @@ def insert(values):
     city = values['city']
     branch = values['branch']
     state = values['state']
-    cursor = db.cursor()
+    db = dbaccess.db_conn()
+    cursor = db.cursor(buffered=True)
     cursor.execute("INSERT INTO vendor(vendorid,storename,storeid,city,branch,state)VALUES(%s,%s,%s,%s,%s,%s)",(vid,sname,sid,city,branch,state))
     db.commit()
     message = json.dumps({"status":"OK","message":"SIGN IN SUCCESS"})
@@ -62,7 +62,8 @@ def insert(values):
 
 def fetch(data):
     vid = data['vendorid']
-    cursor = db.cursor(MySQLdb.cursors.DictCursor)
+    db = dbaccess.db_conn()
+    cursor = db.cursor(buffered=True,dictionary=True)
     cursor.execute("SELECT * FROM vendor WHERE vendorid=%s ",(vid)) 
     rows = cursor.fetchall()
     db.commit()
@@ -94,7 +95,8 @@ def fetchone(datas):
         while count < c :
             sid = datas['storeid'][count]
             #print vid,sid
-            cursor=db.cursor(MySQLdb.cursors.DictCursor)
+            db = dbaccess.db_conn()
+            cursor=db.cursor(buffered=True,dictionary=True)
             cursor.execute("SELECT * FROM vendor WHERE vendorid=%s AND storeid =%s",(vid,sid))
             row = cursor.fetchone()
             db.commit()
@@ -114,7 +116,8 @@ def fetchone(datas):
         #print type(datas)
         sid = datas['storeid']
         #print vid,type(sid)
-        cursor=db.cursor(MySQLdb.cursors.DictCursor)
+        db = dbaccess.db_conn()
+        cursor=db.cursor(buffered=True,dictionary=True)
         cursor.execute("SELECT vendorid,storename,storeid,city,branch,state FROM vendor WHERE vendorid=%s AND storeid =%s",(vid,sid))
         row = cursor.fetchone()
         #print row
@@ -131,7 +134,8 @@ def update(values):
     city = values['city']
     branch = values['branch']
     state = values['state']
-    cursor = db.cursor()
+    db = dbaccess.db_conn()
+    cursor = db.cursor(buffered=True)
     cursor.execute("UPDATE vendor SET storename=%s,storeid=%s,city=%s,branch=%s,state=%s WHERE vendorid=%s",(sname,sid,city,branch,state,vid)) 
     db.commit()
     message = json.dumps({"status":"OK","message":"UPDATED SUCCESSFULLY"})
@@ -147,7 +151,8 @@ def delete(value):
         while count <c : 
             sid = value['storeid'][count]
             #print sid
-            cursor=db.cursor()
+            db = dbaccess.db_conn()
+            cursor=db.cursor(buffered=True)
             cursor.execute("DELETE FROM vendor WHERE storeid=%s",(sid,))
             db.commit()
             count+=1
@@ -156,7 +161,8 @@ def delete(value):
 
     else:
         sid = value['storeid']
-        cursor=db.cursor()
+        db = dbaccess.db_conn()
+        cursor=db.cursor(buffered=True)
         cursor.execute("DELETE FROM vendor WHERE storeid = %s " , (sid))
         db.commit()
         message = json.dumps({"status":"OK","message":"DELETED SUCCESSFULLY"})
@@ -164,7 +170,8 @@ def delete(value):
 
 def excelsheet(value):
     vid = value['vendorid']
-    cursor=db.cursor(MySQLdb.cursors.DictCursor)
+    db = dbaccess.db_conn()
+    cursor=db.cursor(buffered=True,dictionary=True)
     cursor.execute("SELECT vendorid,storename,storeid,city,branch,state FROM vendor WHERE vendorid=%s", (vid,))
     result=cursor.fetchall()
     fp = open('sheet.csv', 'w')
@@ -193,7 +200,8 @@ def pdf(value):
                        ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
                        ('BOX', (0,0), (-1,-1), 0.25, colors.black),
                        ])
-    cursor=db.cursor(MySQLdb.cursors.DictCursor)
+    db = dbaccess.db_conn()
+    cursor=db.cursor(buffered=True,dictionary=True)
     cursor.execute("SELECT vendorid,storename,storeid,city,branch,state FROM vendor WHERE vendorid=%s ", (vid,))
     result=cursor.fetchall()
     #content = file("list.pdf","wb")
@@ -234,4 +242,3 @@ def water():
     output.write(outputStream) 
     outputStream.close()
     return "successs"
-
